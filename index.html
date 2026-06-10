@@ -1,0 +1,51 @@
+---
+layout: default
+---
+
+{% assign icons = site.static_files | where_exp: "file", "file.path contains
+'/png/'" | sort: "name" %}
+
+<div class="flex items-center justify-between gap-4 mb-6">
+    <input
+        id="search"
+        type="text"
+        placeholder="Search icons…"
+        class="input input-bordered w-full max-w-xs"
+    />
+    <span class="badge badge-neutral badge-lg">{{ icons | size }} icons</span>
+</div>
+
+<section
+    id="gallery"
+    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+>
+    {% for icon in icons %}
+    <div
+        class="icon-card card bg-base-100 shadow-sm hover:shadow-md transition-shadow"
+        data-name="{{ icon.basename }}"
+        data-url="{{ icon.path | absolute_url }}"
+    >
+        <figure class="px-4 pt-4">
+            <img
+                src="{{ icon.path | relative_url }}"
+                alt="{{ icon.basename }} icon"
+                loading="lazy"
+                width="80"
+                height="80"
+                class="w-20 h-20 object-contain"
+            />
+        </figure>
+        <div class="card-body items-center text-center gap-2 p-3">
+            <p
+                class="text-xs font-medium truncate w-full"
+                title="{{ icon.basename }}"
+            >
+                {{ icon.basename }}
+            </p>
+            <button class="copy-btn btn btn-xs btn-outline w-full">
+                Copy URL
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</section>
