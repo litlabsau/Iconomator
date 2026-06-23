@@ -157,4 +157,4 @@ xcode
 yubicoauthenticator
 yubikeymanager
 zed
-zoom.us
+zoom
