@@ -9,6 +9,7 @@ on:
     paths:
       - "png/**"
       - "scripts/generate-thumbnails.js"
+      - "scripts/generate-sizes.js"
       - "package.json"
       - ".github/workflows/thumbnails.yml"
   workflow_dispatch: {} # allows manual runs from the Actions tab
@@ -32,14 +33,17 @@ jobs:
       - name: Generate thumbnails
         run: node scripts/generate-thumbnails.js
 
-      - name: Commit thumbnails if changed
+      - name: Generate sized PNGs
+        run: node scripts/generate-sizes.js
+
+      - name: Commit generated assets if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/thumbs
+          git add assets/thumbs sizes
           if git diff --cached --quiet; then
-            echo "No thumbnail changes to commit."
+            echo "No generated-asset changes to commit."
           else
-            git commit -m "chore: regenerate icon thumbnails [skip ci]"
+            git commit -m "chore: regenerate icon thumbnails and sizes [skip ci]"
             git push
           fi

@@ -4,7 +4,9 @@
   "private": true,
   "description": "Generates WebP thumbnails of the icons for the gallery previews.",
   "scripts": {
-    "thumbnails": "node scripts/generate-thumbnails.js"
+    "thumbnails": "node scripts/generate-thumbnails.js",
+    "sizes": "node scripts/generate-sizes.js",
+    "assets": "npm run thumbnails && npm run sizes"
   },
   "dependencies": {
     "sharp": "^0.35.1"
