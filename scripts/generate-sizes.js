@@ -1,12 +1,13 @@
 // Generate multiple PNG sizes for each icon — one folder per icon.
 //
-//   png/affinity.png  ->  sizes/affinity/512px.png
-//                         sizes/affinity/256px.png
-//                         sizes/affinity/128px.png
+//   png/affinity.png  ->  png/affinity/512px.png
+//                         png/affinity/256px.png
+//                         png/affinity/128px.png
 //
-// Full resolution lives at png/<name>.png (no 1024 variant, to avoid
-// duplicating the original). Originals in png/ are left untouched. Never
-// upscales: a target larger than the source is skipped.
+// Each icon's sizes live in a folder beside the original. Full resolution
+// stays at png/<name>.png (no 1024 variant, to avoid duplicating the
+// original). The flat source PNGs are never modified. Never upscales: a
+// target larger than the source is skipped.
 //
 // Usage:
 //   npm install
@@ -17,7 +18,7 @@ const path = require("path");
 const sharp = require("sharp");
 
 const SRC_DIR = "png"; // flat source PNGs (unchanged)
-const OUT_DIR = "sizes"; // per-icon folders of sized PNGs (sibling of png/)
+const OUT_DIR = "png"; // per-icon folders of sized PNGs live beside the originals
 const SIZES = [512, 256, 128]; // longest-edge targets, px (full-res stays in png/)
 
 async function main() {
