@@ -1,8 +1,9 @@
 name: Sync icons to gh-pages
 
-# When icons are pushed to main, copy the png/ folder into the gh-pages branch.
-# The push is authenticated with a PAT (secrets.SYNC_TOKEN) instead of the
-# default GITHUB_TOKEN, so it DOES trigger the thumbnails workflow on gh-pages.
+# When icons are pushed to main, copy png/ into gh-pages and generate the
+# per-icon size folders. The push is authenticated with a PAT
+# (secrets.MACOSICONS_PAT) instead of the default GITHUB_TOKEN, so it DOES
+# trigger the thumbnails workflow on gh-pages.
 
 on:
   push:
@@ -25,11 +26,21 @@ jobs:
           ref: gh-pages
           token: ${{ secrets.MACOSICONS_PAT }} # PAT — required for the chain to fire
 
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
       - name: Copy png/ and ICONS.md from main
         run: |
           git fetch origin main
           rm -rf png
           git checkout origin/main -- png ICONS.md
+
+      - name: Generate per-icon sizes
+        run: |
+          npm install
+          node scripts/generate-sizes.js
 
       - name: Commit and push if icons changed
         run: |
@@ -39,6 +50,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to sync."
           else
-            git commit -m "chore: sync icons and ICONS.md from main"
+            git commit -m "chore: sync icons + generate sizes from main"
             git push origin gh-pages
           fi
