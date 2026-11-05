@@ -2,15 +2,21 @@
 layout: default
 ---
 
-{% assign icons = site.static_files | where_exp: "file", "file.path contains
-'/png/'" | sort: "name" %}
+{%- comment -%} Every PNG under png/ — flat originals AND nested size variants {%- endcomment -%}
+{%- assign png_files = site.static_files | where_exp: "file", "file.path contains '/png/' and file.extname == '.png'" | sort: "name" -%}
+
+{%- comment -%} Count only top-level originals: /png/name.png splits into 3 segments {%- endcomment -%}
+{%- assign icon_count = 0 -%}
+{%- for file in png_files -%}
+    {%- assign segs = file.path | split: "/" -%}
+    {%- if segs.size == 3 -%}{%- assign icon_count = icon_count | plus: 1 -%}{%- endif -%}
+{%- endfor -%}
 
 <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
     <div class="input-group mb-3">
         <a class="input-group-text">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 18.3691 17.998"
                 height="16"
                 width="10"
@@ -30,22 +36,20 @@ layout: default
             placeholder="Search icons…"
         />
     </div>
-    <span class="badge text-bg-success fs-6 rounded-pill"
-        >{{ icons | size }} icons</span
-    >
+    <span class="badge text-bg-success fs-6 rounded-pill">{{ icon_count }} icons</span>
 </div>
 
 <div
     id="gallery"
     class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3"
 >
-    {% for icon in icons %}
+    {% for icon in png_files %}
+    {%- assign segs = icon.path | split: "/" -%}
+    {%- if segs.size != 3 -%}{%- continue -%}{%- endif -%}
+    {%- assign prefix = "/png/" | append: icon.basename | append: "/" -%}
+    {%- assign sizefiles = png_files | where_exp: "f", "f.path contains prefix" | sort: "name" | reverse -%}
     <div class="col">
-        <div
-            class="icon-card card"
-            data-name="{{ icon.basename }}"
-            data-url="{{ icon.path | absolute_url }}"
-        >
+        <div class="icon-card card" data-name="{{ icon.basename }}">
             <div
                 class="card-body d-flex flex-column align-items-center text-center gap-2 p-3"
             >
@@ -63,7 +67,32 @@ layout: default
                 >
                     {{ icon.basename }}
                 </p>
-                <div class="d-flex gap-2 align-items-center">
+
+                <select
+                    class="size-select form-select form-select-sm"
+                    aria-label="Size for {{ icon.basename }}"
+                >
+                    {% for sf in sizefiles %}
+                    <option
+                        value="{{ sf.path | absolute_url }}"
+                        data-dl="{{ sf.path | relative_url }}"
+                        data-fn="{{ icon.basename }}-{{ sf.name }}"
+                        {% if forloop.first %}selected{% endif %}
+                    >
+                        {{ sf.basename | remove: "px" }} px
+                    </option>
+                    {% endfor %}
+                    <option
+                        value="{{ icon.path | absolute_url }}"
+                        data-dl="{{ icon.path | relative_url }}"
+                        data-fn="{{ icon.name }}"
+                        {% if sizefiles == empty %}selected{% endif %}
+                    >
+                        Original
+                    </option>
+                </select>
+
+                <div class="d-flex gap-2 w-100">
                     <button
                         class="copy-btn btn btn-outline-primary btn-sm"
                         style="flex: 1 1 0"
@@ -72,7 +101,6 @@ layout: default
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            xmlns:xlink="http://www.w3.org/1999/xlink"
                             viewBox="0 0 16.7871 27.0605"
                             height="16"
                             width="10"
@@ -87,15 +115,14 @@ layout: default
                             />
                         </svg>
                     </button>
-                    <a
-                        class="btn btn-outline-primary btn-sm"
+                    <button
+                        class="download-btn btn btn-outline-primary btn-sm"
                         style="flex: 1 1 0"
-                        href="{{ icon.path | relative_url }}"
-                        download="{{ icon.name }}"
+                        title="Download"
+                        aria-label="Download"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            xmlns:xlink="http://www.w3.org/1999/xlink"
                             viewBox="0 0 18.3691 17.998"
                             height="16"
                             width="10"
@@ -106,7 +133,7 @@ layout: default
                                 d="M12.8027 2.24609C12.8027 0.820312 12.002 0 10.6055 0L7.29492 0C5.89844 0 5.09766 0.820312 5.09766 2.24609L5.09766 14.2773C5.09766 15.7031 5.89844 16.5234 7.29492 16.5234L10.6055 16.5234C12.002 16.5234 12.8027 15.7031 12.8027 14.2773ZM1.14258 10.3613C0.488281 10.3613 0 10.8496 0 11.5137C0 11.9922 0.195312 12.3828 0.634766 12.8516L7.91016 20.5566C8.26172 20.9277 8.63281 21.0547 8.95508 21.0547C9.28711 21.0547 9.6582 20.9277 10.0098 20.5566L17.2168 12.8516C17.7051 12.334 17.9199 12.0117 17.9199 11.5332C17.9199 10.8496 17.373 10.3613 16.7188 10.3613Z"
                             />
                         </svg>
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
