@@ -3,7 +3,7 @@ layout: default
 ---
 
 {%- comment -%} Every PNG under png/ — flat originals AND nested size variants {%- endcomment -%}
-{%- assign png_files = site.static_files | where_exp: "file", "file.path contains '/png/' and file.extname == '.png'" | sort: "name" -%}
+{%- assign png_files = site.static_files | where_exp: "file", "file.path contains '/png/'" | sort: "name" -%}
 
 {%- comment -%} Count only top-level originals: /png/name.png splits into 3 segments {%- endcomment -%}
 {%- assign icon_count = 0 -%}
@@ -47,7 +47,6 @@ layout: default
     {%- assign segs = icon.path | split: "/" -%}
     {%- if segs.size != 3 -%}{%- continue -%}{%- endif -%}
     {%- assign prefix = "/png/" | append: icon.basename | append: "/" -%}
-    {%- assign sizefiles = png_files | where_exp: "f", "f.path contains prefix" | sort: "name" | reverse -%}
     <div class="col">
         <div class="icon-card card" data-name="{{ icon.basename }}">
             <div
@@ -72,21 +71,21 @@ layout: default
                     class="size-select form-select form-select-sm"
                     aria-label="Size for {{ icon.basename }}"
                 >
-                    {% for sf in sizefiles %}
+                    {% for sf in png_files reversed %}
+                    {% if sf.path contains prefix %}
                     <option
                         value="{{ sf.path | absolute_url }}"
                         data-dl="{{ sf.path | relative_url }}"
                         data-fn="{{ icon.basename }}-{{ sf.name }}"
-                        {% if forloop.first %}selected{% endif %}
                     >
                         {{ sf.basename | remove: "px" }} px
                     </option>
+                    {% endif %}
                     {% endfor %}
                     <option
                         value="{{ icon.path | absolute_url }}"
                         data-dl="{{ icon.path | relative_url }}"
                         data-fn="{{ icon.name }}"
-                        {% if sizefiles == empty %}selected{% endif %}
                     >
                         Original
                     </option>
